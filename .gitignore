@@ -56,3 +56,9 @@ typings/
 
 # dotenv environment variables file
 .env
+<<<<<<< HEAD
+=======
+
+src/
+tsconfig.json
+>>>>>>> 1106104... TS 2.6

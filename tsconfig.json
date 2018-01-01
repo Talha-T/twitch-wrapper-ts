@@ -6,6 +6,7 @@
     "sourceRoot": "src",
     "strict": true,
     "sourceMap": true,
+    "declaration": true,
     "typeRoots": [
       "node_modules/@types"
     ]

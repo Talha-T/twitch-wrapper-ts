@@ -1,4 +1,4 @@
-# Twitch.ts
+# twitch-wrapper-ts
 #### Twitch Chat & API Wrapper for Node.js Typescript
 ---
 
@@ -10,18 +10,18 @@
 - (TODO): Twitch API Calls
 
 ### Installation:
-`npm install Twitch.ts`
+`npm install twitch-wrapper-ts`
 
 ### How to Use:
 After installing the package, getting chat is as easy as this:
 ```js
-import Twitch from "Twitch.ts";
+import { Twitch } from "twitch-wrapper-ts";
 
 const twitch: Twitch = new Twitch("username", "token", "channelnames", "seperated");
 
 twitch.connect();
 twitch.on("connected", () => console.log("WOHOO!"));
-twitch.on("message", (message) => console.log(`content: ${message.content}`));
+twitch.on("message", (message : Message) => console.log(`content: ${message.content}`));
 ```
 
 ### Contact:

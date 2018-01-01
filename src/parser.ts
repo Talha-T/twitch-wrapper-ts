@@ -1,5 +1,5 @@
 import { Dictionary } from "typescript-collections";
-import { convertCase, isNumeric } from "./utils";
+import { convertCase } from "./utils";
 import { isNumber, isBoolean } from "util";
 import { Message } from "./types/message";
 
@@ -7,7 +7,7 @@ import { Message } from "./types/message";
  * Parses Twitch response to TypeScript classes.
  */
 
-class KeyValuePair {
+export class KeyValuePair {
     constructor(k: string, v: string) {
         this.key = k;
         this.value = v;

@@ -12,6 +12,7 @@ class KeyValuePair {
         this.value = v;
     }
 }
+exports.KeyValuePair = KeyValuePair;
 class Parser {
     /**
      * converts key=value; pair into KeyValuePair instance.
@@ -63,7 +64,6 @@ class Parser {
         // there are two :'s, first for seperating message data; second for content
         const colonIndex = message.indexOf(":");
         const data = message.substr(0, colonIndex - 1); // get data 'til :
-        console.log("DATA: " + data);
         const messageObj = this.parseObject(data, new message_1.Message());
         const channelIndex = message.indexOf("PRIVMSG") + "PRIVMSG".length + 1; // 1 for the space
         const lastColonIndex = message.lastIndexOf(":");
