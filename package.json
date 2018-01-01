@@ -1,0 +1,34 @@
+{
+  "name": "twitch.ts",
+  "version": "1.0.0",
+  "description": "(Recent) Twitch API Wrapper for TypeScript in node.js environment.",
+  "main": "index.js",
+  "dependencies": {
+    "typescript-collections": "^1.2.5",
+    "ws": "^3.3.3"
+  },
+  "devDependencies": {
+    "@types/ws": "^3.2.1",
+    "typescript": "^2.6.2"
+  },
+  "scripts": {
+    "start": "node out/index.js",
+    "test": "node out/test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Talha-T/Twitch.ts.git"
+  },
+  "keywords": [
+    "twitch",
+    "api",
+    "node",
+    "typescript"
+  ],
+  "author": "Talha Talip Açıkgöz aka Implicit",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Talha-T/twitch.ts/issues"
+  },
+  "homepage": "https://github.com/Talha-T/twitch.ts#readme"
+}
