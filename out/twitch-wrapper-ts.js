@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const ws = require("ws");
 const parser_1 = require("./parser");
-const broadcaster_1 = require("./types/broadcaster");
+const Dictionary_1 = require("typescript-collections/dist/lib/Dictionary");
 const events_1 = require("events");
 const parser = new parser_1.Parser;
 /**
@@ -19,6 +19,7 @@ class Twitch extends events_1.EventEmitter {
     constructor(userName, password, ...channels) {
         super();
         this.chatServer = new ws("wss://irc-ws.chat.twitch.tv:443/irc");
+        this.broadcasters = new Dictionary_1.default();
         this.user = userName;
         this.oAuth = password;
         this.channels = channels;
@@ -43,18 +44,20 @@ class Twitch extends events_1.EventEmitter {
         };
         this.chatServer.onmessage = function (event) {
             const message = event.data.toString();
-            if (message.startsWith(":tmi.twitch.tv NOTICE * :Login authentication failed")) {
+            if (message.includes("Login authentication failed")) {
                 throw new Error("Login authentication failed");
             }
-            if (message.startsWith(":tmi.twitch.tv 001 implicit1 :Welcome, GLHF!")) {
+            if (message.includes("Welcome, GLHF!")) {
                 that.emit("connected");
             }
             else if (message.startsWith("@broadcaster")) {
-                const broadcaster = parser.parseObject(message, new broadcaster_1.Broadcaster());
-                // console.log(broadcaster);
+                const broadcaster = parser.parseBroadcaster(message);
+                that.broadcasters.setValue(broadcaster.channel, broadcaster.broadcaster);
             }
             else if (message.includes("PRIVMSG")) {
-                that.emit("message", parser.parseMessage(message));
+                const messageData = parser.parseMessage(message);
+                messageData.broadcaster = that.broadcasters.getValue(messageData.channel);
+                that.emit("message", messageData);
             }
             else if (message === "PING :tmi.twitch.tv") {
                 that.chatServer.send("PONG :tmi.twitch.tv");

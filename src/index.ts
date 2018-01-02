@@ -1,3 +1,3 @@
 export { Twitch } from "./twitch-wrapper-ts";
-export { Message } from "./types/looseObject";
-export { Broadcaster } from "./types/looseObject";
+export { Message } from "./looseObject";
+export { Broadcaster } from "./looseObject";

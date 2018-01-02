@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const utils_1 = require("./utils");
 const util_1 = require("util");
-const looseObject_1 = require("./types/looseObject");
+const looseObject_1 = require("./looseObject");
 /**
  * Parses Twitch response to TypeScript classes.
  */
@@ -72,6 +72,16 @@ class Parser {
         messageObj.channel = channel;
         messageObj.content = content.replace("\r\n", ""); // remove default empty line
         return messageObj;
+    }
+    parseBroadcaster(message) {
+        // @broadcaster-lang=;emote-only=0;followers-only=-1;mercury=0;r9k=0;rituals=0;room-id=155856431;
+        // slow=0;subs-only=0 :tmi.twitch.tv ROOMSTATE #ligbot
+        const ROOMSTATE = ":tmi.twitch.tv ROOMSTATE";
+        const roomStateIndex = message.indexOf(ROOMSTATE);
+        const data = message.substring(0, roomStateIndex - 1);
+        const broadcaster = this.parseObject(data, new looseObject_1.Broadcaster());
+        const channel = message.substring(roomStateIndex + 1 + ROOMSTATE.length);
+        return { broadcaster: broadcaster, channel: channel.replace("\r\n", "") };
     }
 }
 exports.Parser = Parser;

@@ -1,9 +1,9 @@
 import * as ws from "ws";
 import { Data } from "ws";
 import { Parser } from "./parser";
-import { Broadcaster } from "./types/broadcaster";
 import Dictionary from "typescript-collections/dist/lib/Dictionary";
 import { EventEmitter } from "events";
+import { Broadcaster, Message } from "./looseObject";
 const parser: Parser = new Parser;
 
 /**
@@ -32,6 +32,7 @@ export class Twitch extends EventEmitter {
         super.on(event, listener);
         return this;
     }
+    broadcasters: Dictionary<string, Broadcaster> = new Dictionary<string, Broadcaster>();
     /**
      * Connects twitch client.
      */
@@ -51,16 +52,20 @@ export class Twitch extends EventEmitter {
 
         this.chatServer.onmessage = function (event: { data: ws.Data, type: string, target: ws }): any {
             const message: string = event.data.toString();
-            if (message.startsWith(":tmi.twitch.tv NOTICE * :Login authentication failed")) {
+            if (message.includes("Login authentication failed")) {
                 throw new Error("Login authentication failed");
             }
-            if (message.startsWith(":tmi.twitch.tv 001 implicit1 :Welcome, GLHF!")) { // default connect message
+            if (message.includes("Welcome, GLHF!")) { // default connect message
                 that.emit("connected");
             } else if (message.startsWith("@broadcaster")) { // if broadcaster data is present
-                const broadcaster: Broadcaster = parser.parseObject(message, new Broadcaster()) as Broadcaster;
-                // console.log(broadcaster);
+                const broadcaster: { broadcaster: Broadcaster, channel: string } =
+                    parser.parseBroadcaster(message) as { broadcaster: Broadcaster, channel: string };
+                that.broadcasters.setValue(broadcaster.channel, broadcaster.broadcaster);
+
             } else if (message.includes("PRIVMSG")) {
-                that.emit("message", parser.parseMessage(message));
+                const messageData: Message = parser.parseMessage(message);
+                messageData.broadcaster = that.broadcasters.getValue(messageData.channel);
+                that.emit("message", messageData);
             } else if (message === "PING :tmi.twitch.tv") {
                 that.chatServer.send("PONG :tmi.twitch.tv");
             }

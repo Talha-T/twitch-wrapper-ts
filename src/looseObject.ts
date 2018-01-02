@@ -32,4 +32,5 @@ export class Message implements ILooseObject {
     userType: string = "";
     content: string = "";
     channel: string = "";
+    broadcaster: Broadcaster;
 }
