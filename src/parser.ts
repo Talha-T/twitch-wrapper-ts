@@ -1,7 +1,7 @@
 import { Dictionary } from "typescript-collections";
 import { convertCase } from "./utils";
 import { isNumber, isBoolean } from "util";
-import { Message } from "./types/message";
+import { Message, ILooseObject } from "./types/looseObject";
 
 /**
  * Parses Twitch response to TypeScript classes.

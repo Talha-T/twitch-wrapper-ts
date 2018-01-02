@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const utils_1 = require("./utils");
 const util_1 = require("util");
-const message_1 = require("./types/message");
+const looseObject_1 = require("./types/looseObject");
 /**
  * Parses Twitch response to TypeScript classes.
  */
@@ -64,7 +64,7 @@ class Parser {
         // there are two :'s, first for seperating message data; second for content
         const colonIndex = message.indexOf(":");
         const data = message.substr(0, colonIndex - 1); // get data 'til :
-        const messageObj = this.parseObject(data, new message_1.Message());
+        const messageObj = this.parseObject(data, new looseObject_1.Message());
         const channelIndex = message.indexOf("PRIVMSG") + "PRIVMSG".length + 1; // 1 for the space
         const lastColonIndex = message.lastIndexOf(":");
         const channel = message.substring(channelIndex, lastColonIndex - 1);
