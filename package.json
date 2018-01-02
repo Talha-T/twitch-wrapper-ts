@@ -7,10 +7,10 @@
   "typings:": "out/index.d.ts",
   "dependencies": {
     "typescript-collections": "^1.2.5",
-    "ws": "^3.3.3"
+    "ws": "^3.3.3",
+    "@types/ws": "^3.2.1"
   },
   "devDependencies": {
-    "@types/ws": "^3.2.1",
     "typescript": "^2.6.2"
   },
   "scripts": {

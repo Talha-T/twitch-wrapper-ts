@@ -28,6 +28,15 @@ export class Twitch extends EventEmitter {
     oAuth: string;
     channels: string[];
     chatServer: ws = new ws("wss://irc-ws.chat.twitch.tv:443/irc");
+
+    /**
+     * Listen to an event with a callback.
+     * Current supported events:
+     * - connected
+     * - message
+     * @param event The event to listen to
+     * @param listener The handler of the event
+     */
     on(event: string | symbol, listener: (...args: any[]) => void): this {
         super.on(event, listener);
         return this;

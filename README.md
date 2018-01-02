@@ -1,5 +1,6 @@
 # twitch-wrapper-ts
 #### Twitch Chat & API Wrapper for Node.js Typescript
+[![NPM](https://nodei.co/npm/twitch-wrapper-ts.png)](https://nodei.co/npm/twitch-wrapper-ts/)
 ---
 
 ### Features:

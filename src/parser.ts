@@ -78,12 +78,16 @@ export class Parser {
         return messageObj;
     }
 
+    /**
+     * Parses broadcaster and channel of Twitch data.
+     * @param message Message to parse
+     */
     parseBroadcaster(message: string): { broadcaster: Broadcaster, channel: string } {
         // @broadcaster-lang=;emote-only=0;followers-only=-1;mercury=0;r9k=0;rituals=0;room-id=155856431;
         // slow=0;subs-only=0 :tmi.twitch.tv ROOMSTATE #ligbot
         const ROOMSTATE: string = ":tmi.twitch.tv ROOMSTATE";
         const roomStateIndex: number = message.indexOf(ROOMSTATE);
-        const data: string = message.substring(0, roomStateIndex - 1);
+        const data: string = message.substring(0, roomStateIndex - 1); // broadcaster data
         const broadcaster: Broadcaster = this.parseObject(data, new Broadcaster()) as Broadcaster;
         const channel: string = message.substring(roomStateIndex + 1 + ROOMSTATE.length);
         return { broadcaster: broadcaster, channel: channel.replace("\r\n", "") };
