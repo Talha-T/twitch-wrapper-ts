@@ -1,6 +1,6 @@
 {
   "name": "twitch-wrapper-ts",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Twitch API Wrapper for TypeScript in node.js environment.",
   "main": "out/index",
   "types": "out/index.d.ts",
