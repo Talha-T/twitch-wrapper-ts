@@ -33,8 +33,8 @@ export class Parser {
      * @param propertyNameConversions If needed, convert twitch property names into class property names. e.g. subs-only to subscriberMode
      * @param t Empty instance of type T
      */
-    parseObject(message: string, t: ILooseObject): ILooseObject {
-        // a
+    parseObject<T extends ILooseObject>(message: string, type: { new(): T; }): T {
+        const t: T = new type();
         if (!message.startsWith("@")) {
             throw "Twitch messages should start with '@'";
         }
@@ -67,7 +67,7 @@ export class Parser {
         // there are two :'s, first for seperating message data; second for content
         const colonIndex: number = message.indexOf(":");
         const data: string = message.substr(0, colonIndex - 1); // get data 'til :
-        const messageObj: Message = this.parseObject(data, new Message()) as Message;
+        const messageObj: Message = this.parseObject(data, Message);
 
         const channelIndex: number = message.indexOf("PRIVMSG") + "PRIVMSG".length + 1; // 1 for the space
         const lastColonIndex: number = message.lastIndexOf(":");
@@ -88,7 +88,7 @@ export class Parser {
         const ROOMSTATE: string = ":tmi.twitch.tv ROOMSTATE";
         const roomStateIndex: number = message.indexOf(ROOMSTATE);
         const data: string = message.substring(0, roomStateIndex - 1); // broadcaster data
-        const broadcaster: Broadcaster = this.parseObject(data, new Broadcaster()) as Broadcaster;
+        const broadcaster: Broadcaster = this.parseObject(data, Broadcaster);
         const channel: string = message.substring(roomStateIndex + 1 + ROOMSTATE.length);
         return { broadcaster: broadcaster, channel: channel.replace("\r\n", "") };
     }
