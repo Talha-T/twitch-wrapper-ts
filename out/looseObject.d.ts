@@ -29,4 +29,20 @@ export declare class Message implements ILooseObject {
     userType: string;
     content: string;
     channel: string;
+    broadcaster: Broadcaster;
+}
+export declare class UserState {
+    badges: string;
+    color: string;
+    displayName: string;
+    emoteSets: string;
+    userType: string;
+}
+export declare class GlobalUserState extends UserState {
+    userId: number;
+}
+export declare class ChannelUserState extends UserState {
+    mod: boolean;
+    subscriber: boolean;
+    channel: string;
 }

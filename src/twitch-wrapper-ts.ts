@@ -3,7 +3,7 @@ import { Data } from "ws";
 import { Parser } from "./parser";
 import Dictionary from "typescript-collections/dist/lib/Dictionary";
 import { EventEmitter } from "events";
-import { Broadcaster, Message } from "./looseObject";
+import { Broadcaster, Message, GlobalUserState, ChannelUserState, UserState } from "./looseObject";
 const parser: Parser = new Parser;
 
 /**
@@ -34,6 +34,8 @@ export class Twitch extends EventEmitter {
      * Current supported events:
      * - connected
      * - message
+     * - global_user_state
+     * - channel_user_state
      * @param event The event to listen to
      * @param listener The handler of the event
      */
@@ -41,7 +43,12 @@ export class Twitch extends EventEmitter {
         super.on(event, listener);
         return this;
     }
+    /**
+     * List of broadcasters. <channelString, Broadcaster>
+     */
     broadcasters: Dictionary<string, Broadcaster> = new Dictionary<string, Broadcaster>();
+    selves: Dictionary<string, ChannelUserState> = new Dictionary<string, ChannelUserState>();
+    globalSelf: GlobalUserState;
     /**
      * Connects twitch client.
      */
@@ -67,9 +74,9 @@ export class Twitch extends EventEmitter {
             if (message.includes("Welcome, GLHF!")) { // default connect message
                 that.emit("connected");
             } else if (message.startsWith("@broadcaster")) { // if broadcaster data is present
-                const broadcaster: { broadcaster: Broadcaster, channel: string } =
-                    parser.parseBroadcaster(message) as { broadcaster: Broadcaster, channel: string };
-                that.broadcasters.setValue(broadcaster.channel, broadcaster.broadcaster);
+                const broadcaster: [Broadcaster, string] =
+                    parser.parseBroadcaster(message);
+                that.broadcasters.setValue(broadcaster[1], broadcaster[0]);
 
             } else if (message.includes("PRIVMSG")) {
                 const messageData: Message = parser.parseMessage(message);
@@ -77,6 +84,16 @@ export class Twitch extends EventEmitter {
                 that.emit("message", messageData);
             } else if (message === "PING :tmi.twitch.tv") {
                 that.chatServer.send("PONG :tmi.twitch.tv");
+            } else if (message.includes("USERSTATE")) {
+                if (message.includes("GLOBALUSERSTATE")) {
+                    const userState: GlobalUserState = parser.parseGlobalUserState(message);
+                    that.globalSelf = userState;
+                    that.emit("global_user_state", userState);
+                } else {
+                    const userState: ChannelUserState = parser.parseChannelUserState(message);
+                    that.selves.setValue(userState.channel, userState);
+                    that.emit("channel_user_state", userState);
+                }
             }
         };
 

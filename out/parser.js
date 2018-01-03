@@ -30,15 +30,15 @@ class Parser {
      * @param propertyNameConversions If needed, convert twitch property names into class property names. e.g. subs-only to subscriberMode
      * @param t Empty instance of type T
      */
-    parseObject(message, t) {
-        // a
-        if (!message.startsWith("@")) {
-            throw "Twitch messages should start with '@'";
+    parseObject(message, type) {
+        const t = new type();
+        let trimmed = message;
+        if (trimmed.startsWith("@")) {
+            trimmed = trimmed.substring(1); // shift @
         }
         // sample data
         // @broadcaster-lang=;emote-only=0;followers-only=-1;mercury=0;r9k=0;rituals=0;
         // room-id=134286305;slow=0;subs-only=0
-        let trimmed = message.substr(1); // shift first letter (@)
         if (trimmed.indexOf(":tmi") > -1) {
             trimmed = trimmed.substring(0, trimmed.indexOf(":tmi") - 1); // do not include tmi.twitch.tv
         }
@@ -64,7 +64,7 @@ class Parser {
         // there are two :'s, first for seperating message data; second for content
         const colonIndex = message.indexOf(":");
         const data = message.substr(0, colonIndex - 1); // get data 'til :
-        const messageObj = this.parseObject(data, new looseObject_1.Message());
+        const messageObj = this.parseObject(data, looseObject_1.Message);
         const channelIndex = message.indexOf("PRIVMSG") + "PRIVMSG".length + 1; // 1 for the space
         const lastColonIndex = message.lastIndexOf(":");
         const channel = message.substring(channelIndex, lastColonIndex - 1);
@@ -73,15 +73,39 @@ class Parser {
         messageObj.content = content.replace("\r\n", ""); // remove default empty line
         return messageObj;
     }
+    /**
+     * Parses broadcaster and channel of Twitch data.
+     * @param message Message to parse
+     */
     parseBroadcaster(message) {
         // @broadcaster-lang=;emote-only=0;followers-only=-1;mercury=0;r9k=0;rituals=0;room-id=155856431;
         // slow=0;subs-only=0 :tmi.twitch.tv ROOMSTATE #ligbot
         const ROOMSTATE = ":tmi.twitch.tv ROOMSTATE";
         const roomStateIndex = message.indexOf(ROOMSTATE);
-        const data = message.substring(0, roomStateIndex - 1);
-        const broadcaster = this.parseObject(data, new looseObject_1.Broadcaster());
-        const channel = message.substring(roomStateIndex + 1 + ROOMSTATE.length);
-        return { broadcaster: broadcaster, channel: channel.replace("\r\n", "") };
+        const data = message.substring(0, roomStateIndex - 1); // broadcaster data
+        const broadcaster = this.parseObject(data, looseObject_1.Broadcaster);
+        const channel = message.substring(roomStateIndex + 1 + ROOMSTATE.length).replace("\r\n", "");
+        return [broadcaster, channel];
+    }
+    /**
+     * Parses user state from string
+     * @param message Message to parse user state from
+     */
+    parseGlobalUserState(message) {
+        const USERSTATE = ":tmi.twitch.tv GLOBALUSERSTATE";
+        const userStateIndex = message.indexOf(USERSTATE);
+        const data = message.substring(0, userStateIndex - 1);
+        const userState = this.parseObject(data, looseObject_1.GlobalUserState);
+        return userState;
+    }
+    parseChannelUserState(message) {
+        const USERSTATE = ":tmi.twitch.tv USERSTATE";
+        const userStateIndex = message.indexOf(USERSTATE);
+        const data = message.substring(0, userStateIndex - 1);
+        const userState = this.parseObject(data, looseObject_1.ChannelUserState);
+        const channel = message.substring(userStateIndex + 1 + USERSTATE.length);
+        userState.channel = channel.replace("\r\n", "");
+        return userState;
     }
 }
 exports.Parser = Parser;

@@ -22,7 +22,37 @@ const twitch: Twitch = new Twitch("username", "token", "channelnames", "seperate
 
 twitch.connect();
 twitch.on("connected", () => console.log("WOHOO!"));
-twitch.on("message", (message : Message) => console.log(`content: ${message.content}`));
+twitch.on("message", (message : Message) => console.log(message));
+/*
+Message {
+  badges: '',
+  color: '#00FF7F',
+  displayName: 'kutsalouse',
+  emotes: '',
+  id: '325003d6-aad3-41c5-aa89-d6ee9c56efd7',
+  mod: true,
+  roomId: 69223356,
+  subscriber: true,
+  tmiSentTs: 1515006994874,
+  turbo: true,
+  userId: 47954587,
+  userType: '',
+  content: 'drop var alt tab yapma artık',
+  channel: '#only35support',
+  broadcaster:
+   Broadcaster {
+     broadcasterLanguage: '',
+     emoteOnly: true,
+     followersOnly: -1,
+     mercury: true,
+     r9k: true,
+     rituals: true,
+     roomId: 69223356,
+     slow: true,
+     subsOnly: true,
+     broadcasterLang: '' } }
+
+*/
 ```
 
 ### Contact:

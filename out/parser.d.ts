@@ -1,4 +1,4 @@
-import { Message, ILooseObject } from "./types/looseObject";
+import { Message, ILooseObject, Broadcaster, GlobalUserState, ChannelUserState } from "./looseObject";
 /**
  * Parses Twitch response to TypeScript classes.
  */
@@ -19,10 +19,23 @@ export declare class Parser {
      * @param propertyNameConversions If needed, convert twitch property names into class property names. e.g. subs-only to subscriberMode
      * @param t Empty instance of type T
      */
-    parseObject(message: string, t: ILooseObject): ILooseObject;
+    parseObject<T extends ILooseObject>(message: string, type: {
+        new (): T;
+    }): T;
     /**
      * Parses message class from tmi message
      * @param message Message to parse
      */
     parseMessage(message: string): Message;
+    /**
+     * Parses broadcaster and channel of Twitch data.
+     * @param message Message to parse
+     */
+    parseBroadcaster(message: string): [Broadcaster, string];
+    /**
+     * Parses user state from string
+     * @param message Message to parse user state from
+     */
+    parseGlobalUserState(message: string): GlobalUserState;
+    parseChannelUserState(message: string): ChannelUserState;
 }

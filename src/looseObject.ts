@@ -34,3 +34,21 @@ export class Message implements ILooseObject {
     channel: string = "";
     broadcaster: Broadcaster;
 }
+
+export class UserState {
+    badges: string = "";
+    color: string = "";
+    displayName: string = "";
+    emoteSets: string = "";
+    userType: string = "";
+}
+
+export class GlobalUserState extends UserState {
+    userId: number = -1;
+}
+
+export class ChannelUserState extends UserState {
+    mod: boolean = false;
+    subscriber: boolean = false;
+    channel : string = "";
+}

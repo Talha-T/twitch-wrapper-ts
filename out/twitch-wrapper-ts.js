@@ -19,11 +19,25 @@ class Twitch extends events_1.EventEmitter {
     constructor(userName, password, ...channels) {
         super();
         this.chatServer = new ws("wss://irc-ws.chat.twitch.tv:443/irc");
+        /**
+         * List of broadcasters. <channelString, Broadcaster>
+         */
         this.broadcasters = new Dictionary_1.default();
+        this.selves = new Dictionary_1.default();
         this.user = userName;
         this.oAuth = password;
         this.channels = channels;
     }
+    /**
+     * Listen to an event with a callback.
+     * Current supported events:
+     * - connected
+     * - message
+     * - global_user_state
+     * - channel_user_state
+     * @param event The event to listen to
+     * @param listener The handler of the event
+     */
     on(event, listener) {
         super.on(event, listener);
         return this;
@@ -52,7 +66,7 @@ class Twitch extends events_1.EventEmitter {
             }
             else if (message.startsWith("@broadcaster")) {
                 const broadcaster = parser.parseBroadcaster(message);
-                that.broadcasters.setValue(broadcaster.channel, broadcaster.broadcaster);
+                that.broadcasters.setValue(broadcaster[1], broadcaster[0]);
             }
             else if (message.includes("PRIVMSG")) {
                 const messageData = parser.parseMessage(message);
@@ -61,6 +75,18 @@ class Twitch extends events_1.EventEmitter {
             }
             else if (message === "PING :tmi.twitch.tv") {
                 that.chatServer.send("PONG :tmi.twitch.tv");
+            }
+            else if (message.includes("USERSTATE")) {
+                if (message.includes("GLOBALUSERSTATE")) {
+                    const userState = parser.parseGlobalUserState(message);
+                    that.globalSelf = userState;
+                    that.emit("global_user_state", userState);
+                }
+                else {
+                    const userState = parser.parseChannelUserState(message);
+                    that.selves.setValue(userState.channel, userState);
+                    that.emit("channel_user_state", userState);
+                }
             }
         };
         this.chatServer.onerror = function (err) {

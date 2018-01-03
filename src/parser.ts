@@ -1,7 +1,7 @@
 import { Dictionary } from "typescript-collections";
 import { convertCase } from "./utils";
 import { isNumber, isBoolean } from "util";
-import { Message, ILooseObject, Broadcaster } from "./looseObject";
+import { Message, ILooseObject, Broadcaster, UserState, GlobalUserState, ChannelUserState } from "./looseObject";
 
 /**
  * Parses Twitch response to TypeScript classes.
@@ -35,13 +35,13 @@ export class Parser {
      */
     parseObject<T extends ILooseObject>(message: string, type: { new(): T; }): T {
         const t: T = new type();
-        if (!message.startsWith("@")) {
-            throw "Twitch messages should start with '@'";
+        let trimmed: string = message;
+        if (trimmed.startsWith("@")) {
+            trimmed = trimmed.substring(1); // shift @
         }
         // sample data
         // @broadcaster-lang=;emote-only=0;followers-only=-1;mercury=0;r9k=0;rituals=0;
         // room-id=134286305;slow=0;subs-only=0
-        let trimmed: string = message.substr(1); // shift first letter (@)
         if (trimmed.indexOf(":tmi") > -1) {
             trimmed = trimmed.substring(0, trimmed.indexOf(":tmi") - 1); // do not include tmi.twitch.tv
         }
@@ -82,15 +82,37 @@ export class Parser {
      * Parses broadcaster and channel of Twitch data.
      * @param message Message to parse
      */
-    parseBroadcaster(message: string): { broadcaster: Broadcaster, channel: string } {
+    parseBroadcaster(message: string): [Broadcaster, string] {
         // @broadcaster-lang=;emote-only=0;followers-only=-1;mercury=0;r9k=0;rituals=0;room-id=155856431;
         // slow=0;subs-only=0 :tmi.twitch.tv ROOMSTATE #ligbot
         const ROOMSTATE: string = ":tmi.twitch.tv ROOMSTATE";
         const roomStateIndex: number = message.indexOf(ROOMSTATE);
         const data: string = message.substring(0, roomStateIndex - 1); // broadcaster data
         const broadcaster: Broadcaster = this.parseObject(data, Broadcaster);
-        const channel: string = message.substring(roomStateIndex + 1 + ROOMSTATE.length);
-        return { broadcaster: broadcaster, channel: channel.replace("\r\n", "") };
+        const channel: string = message.substring(roomStateIndex + 1 + ROOMSTATE.length).replace("\r\n", "");
+        return [broadcaster, channel];
+    }
+
+    /**
+     * Parses user state from string
+     * @param message Message to parse user state from
+     */
+    parseGlobalUserState(message: string): GlobalUserState {
+        const USERSTATE: string = ":tmi.twitch.tv GLOBALUSERSTATE";
+        const userStateIndex: number = message.indexOf(USERSTATE);
+        const data: string = message.substring(0, userStateIndex - 1);
+        const userState: GlobalUserState = this.parseObject(data, GlobalUserState);
+        return userState;
+    }
+
+    parseChannelUserState(message: string): ChannelUserState {
+        const USERSTATE: string = ":tmi.twitch.tv USERSTATE";
+        const userStateIndex: number = message.indexOf(USERSTATE);
+        const data: string = message.substring(0, userStateIndex - 1);
+        const userState: ChannelUserState = this.parseObject(data, ChannelUserState);
+        const channel: string = message.substring(userStateIndex + 1 + USERSTATE.length);
+        userState.channel = channel.replace("\r\n", "");
+        return userState;
     }
 
 }

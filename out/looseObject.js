@@ -33,4 +33,30 @@ class Message {
     }
 }
 exports.Message = Message;
+class UserState {
+    constructor() {
+        this.badges = "";
+        this.color = "";
+        this.displayName = "";
+        this.emoteSets = "";
+        this.userType = "";
+    }
+}
+exports.UserState = UserState;
+class GlobalUserState extends UserState {
+    constructor() {
+        super(...arguments);
+        this.userId = -1;
+    }
+}
+exports.GlobalUserState = GlobalUserState;
+class ChannelUserState extends UserState {
+    constructor() {
+        super(...arguments);
+        this.mod = false;
+        this.subscriber = false;
+        this.channel = "";
+    }
+}
+exports.ChannelUserState = ChannelUserState;
 //# sourceMappingURL=looseObject.js.map
