@@ -41,7 +41,6 @@ Message {
   channel: '#only35support',
   broadcaster:
    Broadcaster {
-     broadcasterLanguage: '',
      emoteOnly: true,
      followersOnly: -1,
      mercury: true,
@@ -50,8 +49,8 @@ Message {
      roomId: 69223356,
      slow: true,
      subsOnly: true,
-     broadcasterLang: '' } }
-
+     broadcasterLang: '' }
+}
 */
 ```
 
