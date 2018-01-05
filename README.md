@@ -16,7 +16,7 @@
 ### How to Use:
 After installing the package, getting chat is as easy as this:
 ```js
-import { Twitch, Message } from "twitch-wrapper-ts";
+import { Twitch, Message, ChannelUserState } from "twitch-wrapper-ts";
 
 const twitch: Twitch = new Twitch("username", "token", "channelnames", "seperated");
 
