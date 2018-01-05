@@ -30,3 +30,7 @@ export function convertCase(key: string): string {
     key = key.slice(0, index) + key.slice(index + 1, key.length);
     return convertCase(replaceAt(key, index, key.charAt(index).toLocaleUpperCase()));
 }
+
+export function formatChannelName(channel: string): string {
+    return `#${channel.replace("#", "").toLowerCase()}`;
+}

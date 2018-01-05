@@ -33,4 +33,8 @@ function convertCase(key) {
     return convertCase(replaceAt(key, index, key.charAt(index).toLocaleUpperCase()));
 }
 exports.convertCase = convertCase;
+function formatChannelName(channel) {
+    return `#${channel.replace("#", "").toLowerCase()}`;
+}
+exports.formatChannelName = formatChannelName;
 //# sourceMappingURL=utils.js.map

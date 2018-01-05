@@ -4,6 +4,7 @@ import { Parser } from "./parser";
 import Dictionary from "typescript-collections/dist/lib/Dictionary";
 import { EventEmitter } from "events";
 import { Broadcaster, Message, GlobalUserState, ChannelUserState, UserState } from "./looseObject";
+import { formatChannelName } from "./utils";
 const parser: Parser = new Parser;
 
 /**
@@ -60,10 +61,9 @@ export class Twitch extends EventEmitter {
             that.chatServer.send(`PASS oauth:${that.oAuth}`);
             that.chatServer.send(`NICK ${that.user}`);
             that.channels.forEach(channel =>
-                that.chatServer.send(`JOIN #${channel.replace("#", "").toLowerCase()}`)
+                that.chatServer.send(`JOIN ${formatChannelName(channel)}`)
             ); // if channel has #, remove it ; also, lowercase the channel otherwise twitch doesn't work.
             that.chatServer.send(`USER ${that.user}`);
-            // chatServer.send("PRIVMSG #implicit1 :This is a sample message");
         };
 
         this.chatServer.onmessage = function (event: { data: ws.Data, type: string, target: ws }): any {
@@ -81,7 +81,8 @@ export class Twitch extends EventEmitter {
             } else if (message.includes("PRIVMSG")) {
                 const messageData: Message = parser.parseMessage(message);
                 messageData.broadcaster = that.broadcasters.getValue(messageData.channel);
-                that.emit("message", messageData);
+                const channelState: ChannelUserState = that.selves.getValue(messageData.channel);
+                that.emit("message", messageData, channelState);
             } else if (message === "PING :tmi.twitch.tv") {
                 that.chatServer.send("PONG :tmi.twitch.tv");
             } else if (message.includes("USERSTATE")) {
@@ -100,5 +101,13 @@ export class Twitch extends EventEmitter {
         this.chatServer.onerror = function (err: Error): any {
             throw err;
         };
+    }
+    /**
+     * Sends given message to the channel
+     * @param message What content you want to send
+     * @param channel Channel you want to send. Using # doesn't matter.
+     */
+    send(message: string, channel: string): void {
+        this.chatServer.send(`PRIVMSG ${formatChannelName(channel)} :${message}`);
     }
 }

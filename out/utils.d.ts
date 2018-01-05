@@ -17,3 +17,4 @@ export declare function replaceAt(text: string, index: number, replacement: stri
  * @param key Key to convert case
  */
 export declare function convertCase(key: string): string;
+export declare function formatChannelName(channel: string): string;

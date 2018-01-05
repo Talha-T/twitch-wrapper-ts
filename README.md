@@ -21,8 +21,9 @@ import { Twitch, Message } from "twitch-wrapper-ts";
 const twitch: Twitch = new Twitch("username", "token", "channelnames", "seperated");
 
 twitch.connect();
-twitch.on("connected", () => console.log("WOHOO!"));
-twitch.on("message", (message : Message) => console.log(message));
+twitch.on("connected", () => twitch.send("Connected!!", "somechannel"));
+twitch.on("message", (message: Message, channelState: ChannelUserState) => console.log(message));
+    
 /*
 Message {
   badges: '',
@@ -53,6 +54,12 @@ Message {
 }
 */
 ```
+
+### Important Notes.
+- Do not include the prefix `oauth:` in your oath password.
+- If you do not have one, get it here: http://twitchapps.com/tmi/
+- Including # or not in the channel does NOT matter.
+- Currently you can get detailed information in IntelliSense, documententation will be added soon.
 
 ### Contact:
 Implicit#8954 on Discord, or just open an issue.

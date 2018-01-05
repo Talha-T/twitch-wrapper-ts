@@ -3,7 +3,7 @@ export interface ILooseObject {
 }
 export declare class Broadcaster implements ILooseObject {
     [key: string]: any;
-    broadcasterLanguage: string;
+    broadcasterLang: string;
     emoteOnly: boolean;
     followersOnly: number;
     mercury: boolean;

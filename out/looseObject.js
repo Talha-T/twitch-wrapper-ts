@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 class Broadcaster {
     constructor() {
-        this.broadcasterLanguage = "";
+        this.broadcasterLang = "";
         this.emoteOnly = false;
         this.followersOnly = -1;
         this.mercury = false;
