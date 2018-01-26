@@ -6,9 +6,12 @@
   "types": "out/index.d.ts",
   "typings:": "out/index.d.ts",
   "dependencies": {
+    "@types/request": "^2.0.9",
+    "@types/ws": "^3.2.1",
+    "require-promise": "^1.0.1",
     "typescript-collections": "^1.2.5",
-    "ws": "^3.3.3",
-    "@types/ws": "^3.2.1"
+    "web-request": "^1.0.7",
+    "ws": "^3.3.3"
   },
   "devDependencies": {
     "typescript": "^2.6.2"
