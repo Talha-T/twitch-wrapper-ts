@@ -8,7 +8,8 @@
 - Small
 - Easy to extend
 - Twitch chat livestream
-- (TODO): Twitch API Calls
+- Twitch API Calls
+- TODO: Twitch Response Types
 
 ### Installation:
 `npm install twitch-wrapper-ts`
@@ -55,8 +56,29 @@ Message {
 */
 ```
 
+Api Calls (types not yet implemented):
+```js
+const result: any = await requester.get<any>("/users", {
+    login: ["implicit1"]
+});
+console.log(result);
+/*
+{ _total: 1,
+  users:
+   [ { display_name: 'implicit1',
+       _id: '69056964',
+       name: 'implicit1',
+       type: 'user',
+       bio: null,
+       created_at: '2014-08-15T17:41:08.724835Z',
+       updated_at: '2018-01-05T20:03:12.090905Z',
+       logo: 'https://static-cdn.jtvnw.net/user-default-pictures/cd618d3e-f14d-4960-b7cf-094231b04735-profile_image-300x300.jpg' }
+] }
+*/
+```
+
 ### Important Notes.
-- Do not include the prefix `oauth:` in your oath password.
+- Do not include the prefix `oauth:` in your oauth password.
 - If you do not have one, get it here: http://twitchapps.com/tmi/
 - Including # or not in the channel does NOT matter.
 - Currently you can get detailed information in IntelliSense, documententation will be added soon.
