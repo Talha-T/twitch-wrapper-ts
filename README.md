@@ -58,6 +58,9 @@ Message {
 
 Api Calls (types not yet implemented):
 ```js
+import { ApiRequester } from "twitch-wrapper-ts";
+const requester: ApiRequester = new ApiRequester(clientId);
+
 const result: any = await requester.get<any>("/users", {
     login: ["implicit1"]
 });
