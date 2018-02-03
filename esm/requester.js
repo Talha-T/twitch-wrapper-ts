@@ -1,4 +1,3 @@
-"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -7,16 +6,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-const query_string_1 = require("query-string");
-const twitchError_1 = require("./twitchError");
+import { stringify } from "query-string";
+import TwitchError from "./twitchError";
 const requestP = typeof fetch !== "undefined"
     ? Promise.resolve({
         delete: (url, headers) => fetch(url, { headers, method: "DELETE" }),
         get: (url, headers) => fetch(url, { headers, method: "GET" }),
         post: (url, headers) => fetch(url, { headers, method: "POST" }),
         put: (url, headers) => fetch(url, { headers, method: "PUT" }),
-    }) : Promise.resolve().then(() => require("web-request" /* no module support for web-request */ + "")).then((request) => {
+    }) : import("web-request" /* no module support for web-request */ + "").then((request) => {
     // normalize response
     Object.defineProperty(request.Response.prototype, "status", {
         get() { return this.statusCode; },
@@ -35,7 +33,7 @@ const requestP = typeof fetch !== "undefined"
 /**
  * The main Api Requester
  */
-class ApiRequester {
+export class ApiRequester {
     /**
      * Constructs ApiRequester instance
      * @param clientId Twitch Client ID for API Calls
@@ -54,14 +52,14 @@ class ApiRequester {
     get(path, queryParameters) {
         return __awaiter(this, void 0, void 0, function* () {
             // url and headers for request
-            const queryString = query_string_1.stringify(queryParameters);
+            const queryString = stringify(queryParameters);
             const uri = this.baseUrl + path + "?" + queryString;
             const headers = this.getHeaders();
             const request = yield requestP;
             const result = yield request.get(uri, headers);
             if (result.status > 308) {
                 const errorObject = yield result.json();
-                throw new twitchError_1.default(errorObject);
+                throw new TwitchError(errorObject);
             }
             return result.json();
         });
@@ -74,14 +72,14 @@ class ApiRequester {
     post(path, queryParameters) {
         return __awaiter(this, void 0, void 0, function* () {
             // url and headers for request
-            const queryString = query_string_1.stringify(queryParameters);
+            const queryString = stringify(queryParameters);
             const uri = this.baseUrl + path + "?" + queryString;
             const headers = this.getHeaders();
             const request = yield requestP;
             const result = yield request.post(uri, headers);
             if (result.status > 308) {
                 const errorObject = yield result.json();
-                throw new twitchError_1.default(errorObject);
+                throw new TwitchError(errorObject);
             }
             return result.json();
         });
@@ -94,14 +92,14 @@ class ApiRequester {
     put(path, queryParameters) {
         return __awaiter(this, void 0, void 0, function* () {
             // url and headers for request
-            const queryString = query_string_1.stringify(queryParameters);
+            const queryString = stringify(queryParameters);
             const uri = this.baseUrl + path + "?" + queryString;
             const headers = this.getHeaders();
             const request = yield requestP;
             const result = yield request.put(uri, headers);
             if (result.status > 308) {
                 const errorObject = yield result.json();
-                throw new twitchError_1.default(errorObject);
+                throw new TwitchError(errorObject);
             }
             return result.json();
         });
@@ -114,14 +112,14 @@ class ApiRequester {
     delete(path, queryParameters) {
         return __awaiter(this, void 0, void 0, function* () {
             // url and headers for request
-            const queryString = query_string_1.stringify(queryParameters);
+            const queryString = stringify(queryParameters);
             const uri = this.baseUrl + path + "?" + queryString;
             const headers = this.getHeaders();
             const request = yield requestP;
             const result = yield request.delete(uri, headers);
             if (result.status > 308) {
                 const errorObject = yield result.json();
-                throw new twitchError_1.default(errorObject);
+                throw new TwitchError(errorObject);
             }
             return result.json();
         });
@@ -145,5 +143,4 @@ class ApiRequester {
         };
     }
 }
-exports.ApiRequester = ApiRequester;
 //# sourceMappingURL=requester.js.map

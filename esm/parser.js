@@ -1,11 +1,9 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const looseObject_1 = require("./looseObject");
-const utils_1 = require("./utils");
+import { Broadcaster, ChannelUserState, GlobalUserState, Message } from "./looseObject";
+import { convertCase } from "./utils";
 /**
  * Parses Twitch response to TypeScript classes.
  */
-class Parser {
+export class Parser {
     /**
      * converts key=value; pair into KeyValuePair instance.
      * @param str Parameter to get pair from
@@ -36,7 +34,7 @@ class Parser {
         const splitted = trimmed.split(";"); // split at ';'
         splitted.forEach((element) => {
             const pair = this.getPair(element); // get pair
-            const key = utils_1.convertCase(pair[0]);
+            const key = convertCase(pair[0]);
             if (typeof t[key] === "boolean") {
                 t[key] = Boolean(pair[1]);
             }
@@ -57,7 +55,7 @@ class Parser {
         // there are two :'s, first for seperating message data; second for content
         const colonIndex = message.indexOf(":");
         const data = message.substr(0, colonIndex - 1); // get data 'til :
-        const messageObj = this.parseObject(data, looseObject_1.Message);
+        const messageObj = this.parseObject(data, Message);
         const channelIndex = message.indexOf("PRIVMSG") + "PRIVMSG".length + 1; // 1 for the space
         const lastColonIndex = message.lastIndexOf(":");
         const channel = message.substring(channelIndex, lastColonIndex - 1);
@@ -76,7 +74,7 @@ class Parser {
         const ROOMSTATE = ":tmi.twitch.tv ROOMSTATE";
         const roomStateIndex = message.indexOf(ROOMSTATE);
         const data = message.substring(0, roomStateIndex - 1); // broadcaster data
-        const broadcaster = this.parseObject(data, looseObject_1.Broadcaster);
+        const broadcaster = this.parseObject(data, Broadcaster);
         const channel = message.substring(roomStateIndex + 1 + ROOMSTATE.length).replace("\r\n", "");
         return [broadcaster, channel];
     }
@@ -88,18 +86,17 @@ class Parser {
         const USERSTATE = ":tmi.twitch.tv GLOBALUSERSTATE";
         const userStateIndex = message.indexOf(USERSTATE);
         const data = message.substring(0, userStateIndex - 1);
-        const userState = this.parseObject(data, looseObject_1.GlobalUserState);
+        const userState = this.parseObject(data, GlobalUserState);
         return userState;
     }
     parseChannelUserState(message) {
         const USERSTATE = ":tmi.twitch.tv USERSTATE";
         const userStateIndex = message.indexOf(USERSTATE);
         const data = message.substring(0, userStateIndex - 1);
-        const userState = this.parseObject(data, looseObject_1.ChannelUserState);
+        const userState = this.parseObject(data, ChannelUserState);
         const channel = message.substring(userStateIndex + 1 + USERSTATE.length);
         userState.channel = channel.replace("\r\n", "");
         return userState;
     }
 }
-exports.Parser = Parser;
 //# sourceMappingURL=parser.js.map
