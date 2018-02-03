@@ -13,6 +13,7 @@
   },
   "exclude": [
     "out",
+    "esm",
     "node_modules"
   ]
 }
