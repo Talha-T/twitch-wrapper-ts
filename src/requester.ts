@@ -1,6 +1,6 @@
 import { stringify } from "query-string";
 
-import { TwitchErrorResponse } from "./apiTypes";
+import { ITwitchErrorResponse } from "./apiTypes";
 import { ILooseObject } from "./looseObject";
 import TwitchError from "./twitchError";
 
@@ -26,7 +26,7 @@ const requestP: Promise<IMinimalFetch> = typeof fetch !== "undefined"
         get: (url: string, headers: IHeaders) => fetch(url, { headers, method: "GET" }),
         post: (url: string, headers: IHeaders) => fetch(url, { headers, method: "POST" }),
         put: (url: string, headers: IHeaders) => fetch(url, { headers, method: "PUT" }),
-    }) : import("web-request" /* no module support for web-request */).then((request) => {
+    }) : import("web-request" /* no module support for web-request */ + "").then((request) => {
         // normalize response
         Object.defineProperty(request.Response.prototype, "status", {
             get(this: { statusCode: number; }) { return this.statusCode; },
@@ -37,10 +37,10 @@ const requestP: Promise<IMinimalFetch> = typeof fetch !== "undefined"
         };
 
         return {
-            delete: (url: string, headers: IHeaders) => request.delete(url, { headers }).then((r) => r as any),
-            get: (url: string, headers: IHeaders) => request.get(url, { headers }).then((r) => r as any),
-            post: (url: string, headers: IHeaders) => request.post(url, { headers }).then((r) => r as any),
-            put: (url: string, headers: IHeaders) => request.put(url, { headers }).then((r) => r as any),
+            delete: (url: string, headers: IHeaders) => request.delete(url, { headers }),
+            get: (url: string, headers: IHeaders) => request.get(url, { headers }),
+            post: (url: string, headers: IHeaders) => request.post(url, { headers }),
+            put: (url: string, headers: IHeaders) => request.put(url, { headers }),
         };
     });
 
@@ -84,7 +84,7 @@ export class ApiRequester implements IRequester {
         const request = await requestP;
         const result = await request.get(uri, headers);
         if (result.status > 308) { // 308 is the last 3xx status code.
-            const errorObject: TwitchErrorResponse = await result.json();
+            const errorObject: ITwitchErrorResponse = await result.json();
             throw new TwitchError(errorObject);
         }
         return result.json();
@@ -104,7 +104,7 @@ export class ApiRequester implements IRequester {
         const request = await requestP;
         const result = await request.post(uri, headers);
         if (result.status > 308) { // 308 is the last 3xx status code.
-            const errorObject: TwitchErrorResponse = await result.json();
+            const errorObject: ITwitchErrorResponse = await result.json();
             throw new TwitchError(errorObject);
         }
         return result.json();
@@ -124,7 +124,7 @@ export class ApiRequester implements IRequester {
         const request = await requestP;
         const result = await request.put(uri, headers);
         if (result.status > 308) { // 308 is the last 3xx status code.
-            const errorObject: TwitchErrorResponse = await result.json();
+            const errorObject: ITwitchErrorResponse = await result.json();
             throw new TwitchError(errorObject);
         }
         return result.json();
@@ -144,7 +144,7 @@ export class ApiRequester implements IRequester {
         const request = await requestP;
         const result = await request.delete(uri, headers);
         if (result.status > 308) { // 308 is the last 3xx status code.
-            const errorObject: TwitchErrorResponse = await result.json();
+            const errorObject: ITwitchErrorResponse = await result.json();
             throw new TwitchError(errorObject);
         }
         return result.json();

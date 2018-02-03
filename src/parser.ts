@@ -1,5 +1,3 @@
-import { Dictionary } from "typescript-collections";
-
 import { Broadcaster, ChannelUserState, GlobalUserState, ILooseObject, Message, UserState } from "./looseObject";
 import { convertCase } from "./utils";
 
