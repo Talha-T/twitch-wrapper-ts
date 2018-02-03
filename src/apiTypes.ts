@@ -1,5 +1,5 @@
 export class TwitchErrorResponse {
-    error : string;
-    status : string;
-    message : string;
+    public error: string;
+    public status: string;
+    public message: string;
 }
