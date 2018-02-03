@@ -1,12 +1,54 @@
 import { EventEmitter } from "events";
-import * as ws from "ws";
-import { Data } from "ws";
 
 import { Broadcaster, ChannelUserState, GlobalUserState, Message, UserState } from "./looseObject";
 import { Parser } from "./parser";
 import { formatChannelName } from "./utils";
 
 const parser: Parser = new Parser();
+
+type IMinimalEventHandler<T, N extends string = string, B extends object = {}> =
+    <E extends { type: N; target: T } & B>(event: E) => void;
+
+interface IMinimalWebSocketBase {
+    onopen: (e: any) => any;
+    onclose: (e: any) => any;
+    onmessage: (e: any) => any;
+    onerror: (e: any) => any;
+
+    send(data: any): void;
+    close(code?: number, reason?: string): void;
+}
+
+/**
+ * Data which could be received through a WebSocket.
+ */
+type WSData = string | ArrayBuffer | Blob | Uint8Array | Uint8Array[];
+
+/**
+ * Minimal definition of a WebSocket.
+ */
+interface IMinimalWebSocket extends IMinimalWebSocketBase {
+    onopen: IMinimalEventHandler<this, "open">;
+    onclose: IMinimalEventHandler<this, "close", { code?: number; reason?: string; }>;
+    onmessage: IMinimalEventHandler<this, "message", { data: WSData; }>;
+    onerror: IMinimalEventHandler<this, "error"> | ((e: any) => void);
+
+    send(data: any): void;
+    close(code?: number, reason?: string): void;
+}
+
+/**
+ * Loosen event handler typings somewhat.
+ * @param ws an instance of an class which implements the WebSocket spec
+ */
+function asMinimalWebSocket<T extends IMinimalWebSocketBase>(ws: T): IMinimalWebSocket { return ws as any; }
+
+/**
+ * Create a native WebSocket if available, otherwise load ws lib.
+ */
+const createWebSocket: (url: string) => Promise<IMinimalWebSocket> = typeof WebSocket !== "undefined"
+    ? (url) => Promise.resolve(asMinimalWebSocket(new WebSocket(url)))
+    : ((wsP) => (url: string) => wsP.then((ws) => asMinimalWebSocket(new ws(url))))(import("ws"));
 
 /**
  * Throws TypeError when the value is `null` or `undefined`.
@@ -27,7 +69,7 @@ export class Twitch extends EventEmitter {
     private user: string;
     private oAuth: string;
     private channels: string[];
-    private chatServer: ws = new ws("wss://irc-ws.chat.twitch.tv:443/irc");
+    private chatServer: Promise<IMinimalWebSocket>;
 
     /**
      * List of broadcasters. <channelString, Broadcaster>
@@ -48,6 +90,7 @@ export class Twitch extends EventEmitter {
         this.user = userName;
         this.oAuth = password;
         this.channels = channels;
+        this.chatServer = createWebSocket("wss://irc-ws.chat.twitch.tv:443/irc");
     }
 
     /**
@@ -70,7 +113,7 @@ export class Twitch extends EventEmitter {
      */
     public async connect(): Promise<void> {
         const chatServer = await this.chatServer;
-        this.chatServer.onopen = () => {
+        chatServer.onopen = () => {
             // pass required parameters into websocket
             chatServer.send("CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership");
             chatServer.send(`PASS oauth:${this.oAuth}`);
@@ -82,7 +125,7 @@ export class Twitch extends EventEmitter {
             chatServer.send(`USER ${this.user}`);
         };
 
-        this.chatServer.onmessage = (event: { data: ws.Data, type: string, target: ws }) => {
+        chatServer.onmessage = (event) => {
             const message: string = event.data.toString();
             if (message.includes("Login authentication failed")) {
                 throw new Error("Login authentication failed");
@@ -100,7 +143,7 @@ export class Twitch extends EventEmitter {
                 const channelState: ChannelUserState = notNull(this.selves.get(messageData.channel));
                 this.emit("message", messageData, channelState);
             } else if (message === "PING :tmi.twitch.tv") {
-                this.chatServer.send("PONG :tmi.twitch.tv");
+                chatServer.send("PONG :tmi.twitch.tv");
             } else if (message.includes("USERSTATE")) {
                 if (message.includes("GLOBALUSERSTATE")) {
                     const userState: GlobalUserState = parser.parseGlobalUserState(message);
@@ -114,7 +157,7 @@ export class Twitch extends EventEmitter {
             }
         };
 
-        this.chatServer.onerror = (err: any) => {
+        chatServer.onerror = (err: any) => {
             throw err;
         };
     }
@@ -124,7 +167,7 @@ export class Twitch extends EventEmitter {
      * @param message What content you want to send
      * @param channel Channel you want to send. Using # doesn't matter.
      */
-    public send(message: string, channel: string): void {
-        this.chatServer.send(`PRIVMSG ${formatChannelName(channel)} :${message}`);
+    public async send(message: string, channel: string) {
+        return (await this.chatServer).send(`PRIVMSG ${formatChannelName(channel)} :${message}`);
     }
 }
