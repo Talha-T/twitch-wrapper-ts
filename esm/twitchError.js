@@ -1,10 +1,8 @@
-import { ITwitchErrorResponse } from "./apiTypes";
-
 export default class TwitchError extends Error {
-    public response: ITwitchErrorResponse;
-    public constructor(twitchErrorResponse: ITwitchErrorResponse) {
+    constructor(twitchErrorResponse) {
         super(twitchErrorResponse.message);
         this.message = twitchErrorResponse.message;
         this.response = twitchErrorResponse;
     }
 }
+//# sourceMappingURL=twitchError.js.map

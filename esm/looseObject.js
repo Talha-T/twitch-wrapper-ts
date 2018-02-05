@@ -1,7 +1,5 @@
-"use strict";
 // tslint:disable:max-classes-per-file
-Object.defineProperty(exports, "__esModule", { value: true });
-class Broadcaster {
+export class Broadcaster {
     constructor() {
         this.broadcasterLang = "";
         this.emoteOnly = false;
@@ -14,8 +12,7 @@ class Broadcaster {
         this.subsOnly = false;
     }
 }
-exports.Broadcaster = Broadcaster;
-class Message {
+export class Message {
     constructor() {
         this.badges = "";
         this.color = "";
@@ -33,8 +30,7 @@ class Message {
         this.channel = "";
     }
 }
-exports.Message = Message;
-class UserState {
+export class UserState {
     constructor() {
         this.badges = "";
         this.color = "";
@@ -43,15 +39,13 @@ class UserState {
         this.userType = "";
     }
 }
-exports.UserState = UserState;
-class GlobalUserState extends UserState {
+export class GlobalUserState extends UserState {
     constructor() {
         super(...arguments);
         this.userId = -1;
     }
 }
-exports.GlobalUserState = GlobalUserState;
-class ChannelUserState extends UserState {
+export class ChannelUserState extends UserState {
     constructor() {
         super(...arguments);
         this.mod = false;
@@ -59,5 +53,4 @@ class ChannelUserState extends UserState {
         this.channel = "";
     }
 }
-exports.ChannelUserState = ChannelUserState;
 //# sourceMappingURL=looseObject.js.map

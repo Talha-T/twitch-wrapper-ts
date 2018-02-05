@@ -1,0 +1,1 @@
+{"version":3,"file":"twitchError.js","sourceRoot":"C:/Users/TimLuq/code/ts/streaming/twitch-wrapper-ts/src/","sources":["twitchError.ts"],"names":[],"mappings":"AAEA,MAAM,CAAC,OAAO,kBAAmB,SAAQ,KAAK;IAE1C,YAAmB,mBAAyC;QACxD,KAAK,CAAC,mBAAmB,CAAC,OAAO,CAAC,CAAC;QACnC,IAAI,CAAC,OAAO,GAAG,mBAAmB,CAAC,OAAO,CAAC;QAC3C,IAAI,CAAC,QAAQ,GAAG,mBAAmB,CAAC;IACxC,CAAC;CACJ"}

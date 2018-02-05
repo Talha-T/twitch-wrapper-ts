@@ -1,39 +1,26 @@
-import { Dictionary } from "typescript-collections";
+import { Broadcaster, ChannelUserState, GlobalUserState, ILooseObject, Message, UserState } from "./looseObject";
 import { convertCase } from "./utils";
-import { isNumber, isBoolean } from "util";
-import { Message, ILooseObject, Broadcaster, UserState, GlobalUserState, ChannelUserState } from "./looseObject";
 
 /**
  * Parses Twitch response to TypeScript classes.
  */
-
-export class KeyValuePair {
-    constructor(k: string, v: string) {
-        this.key = k;
-        this.value = v;
-    }
-    key: string;
-    value: any;
-}
-
 export class Parser {
     /**
      * converts key=value; pair into KeyValuePair instance.
      * @param str Parameter to get pair from
      */
-    getPair(str: string): KeyValuePair {
+    public getPair(str: string): [string, string] {
         const indexOfEquals: number = str.indexOf("=");
         const key: string = str.substr(0, indexOfEquals);
         const value: string = str.substr(indexOfEquals + 1);
-        return new KeyValuePair(key, value);
+        return [key, value];
     }
     /**
      * Parses Twitch message to type of T
      * @param message Twitch message to be parsed
-     * @param propertyNameConversions If needed, convert twitch property names into class property names. e.g. subs-only to subscriberMode
-     * @param t Empty instance of type T
+     * @param type Constructor of T
      */
-    parseObject<T extends ILooseObject>(message: string, type: { new(): T; }): T {
+    public parseObject<T extends ILooseObject>(message: string, type: { new(): T; }): T {
         const t: T = new type();
         let trimmed: string = message;
         if (trimmed.startsWith("@")) {
@@ -46,24 +33,26 @@ export class Parser {
             trimmed = trimmed.substring(0, trimmed.indexOf(":tmi") - 1); // do not include tmi.twitch.tv
         }
         const splitted: string[] = trimmed.split(";"); // split at ';'
-        splitted.forEach(element => {
-            const pair: KeyValuePair = this.getPair(element); // get pair
-            let key: string = convertCase(pair.key);
-            if (isBoolean(t[key])) {
-                pair.value = Boolean(pair.value);
-            } else if (isNumber(t[key])) {
-                pair.value = parseInt(pair.value, 10);
+        splitted.forEach((element) => {
+            const pair = this.getPair(element); // get pair
+            const key: string = convertCase(pair[0]);
+            if (typeof t[key] === "boolean") {
+                t[key] = Boolean(pair[1]);
+            } else if (typeof t[key] === "number") {
+                t[key] = parseInt(pair[1] as string, 10);
+            } else { // set string as is
+                t[key] = pair[1];
             }
-            t[key] = pair.value; // set key on object
         });
 
         return t;
     }
+
     /**
      * Parses message class from tmi message
      * @param message Message to parse
      */
-    parseMessage(message: string): Message {
+    public parseMessage(message: string): Message {
         // there are two :'s, first for seperating message data; second for content
         const colonIndex: number = message.indexOf(":");
         const data: string = message.substr(0, colonIndex - 1); // get data 'til :
@@ -82,7 +71,7 @@ export class Parser {
      * Parses broadcaster and channel of Twitch data.
      * @param message Message to parse
      */
-    parseBroadcaster(message: string): [Broadcaster, string] {
+    public parseBroadcaster(message: string): [Broadcaster, string] {
         // @broadcaster-lang=;emote-only=0;followers-only=-1;mercury=0;r9k=0;rituals=0;room-id=155856431;
         // slow=0;subs-only=0 :tmi.twitch.tv ROOMSTATE #ligbot
         const ROOMSTATE: string = ":tmi.twitch.tv ROOMSTATE";
@@ -97,7 +86,7 @@ export class Parser {
      * Parses user state from string
      * @param message Message to parse user state from
      */
-    parseGlobalUserState(message: string): GlobalUserState {
+    public parseGlobalUserState(message: string): GlobalUserState {
         const USERSTATE: string = ":tmi.twitch.tv GLOBALUSERSTATE";
         const userStateIndex: number = message.indexOf(USERSTATE);
         const data: string = message.substring(0, userStateIndex - 1);
@@ -105,7 +94,7 @@ export class Parser {
         return userState;
     }
 
-    parseChannelUserState(message: string): ChannelUserState {
+    public parseChannelUserState(message: string): ChannelUserState {
         const USERSTATE: string = ":tmi.twitch.tv USERSTATE";
         const userStateIndex: number = message.indexOf(USERSTATE);
         const data: string = message.substring(0, userStateIndex - 1);

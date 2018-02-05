@@ -3,24 +3,26 @@
   "version": "0.5.0",
   "description": "Twitch API Wrapper for TypeScript in node.js environment.",
   "main": "out/index",
+  "module": "esm/index.js",
   "types": "out/index.d.ts",
   "typings:": "out/index.d.ts",
   "dependencies": {
-    "@types/query-string": "^5.0.1",
-    "@types/request": "^2.0.9",
-    "@types/ws": "^3.2.1",
     "query-string": "^5.0.1",
-    "require-promise": "^1.0.1",
-    "typescript-collections": "^1.2.5",
     "web-request": "^1.0.7",
     "ws": "^3.3.3"
   },
   "devDependencies": {
+    "@types/query-string": "^5.0.1",
+    "@types/request": "^2.0.9",
+    "@types/ws": "^3.2.1",
     "typescript": "^2.6.2"
   },
   "scripts": {
     "start": "node out/index.js",
-    "test": "node out/test.js"
+    "test": "node out/test.js",
+    "build": "npm run build-cjs && npm run build-esm",
+    "build-cjs": "tsc -p tsconfig.json",
+    "build-esm": "tsc -p tsconfig.json --module esnext --target es2016 --outDir esm"
   },
   "repository": {
     "type": "git",

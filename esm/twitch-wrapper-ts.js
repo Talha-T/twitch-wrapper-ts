@@ -1,4 +1,3 @@
-"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -7,11 +6,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-const events_1 = require("events");
-const parser_1 = require("./parser");
-const utils_1 = require("./utils");
-const parser = new parser_1.Parser();
+import { EventEmitter } from "events";
+import { Parser } from "./parser";
+import { formatChannelName } from "./utils";
+const parser = new Parser();
 /**
  * Loosen event handler typings somewhat.
  * @param ws an instance of an class which implements the WebSocket spec
@@ -22,7 +20,7 @@ function asMinimalWebSocket(ws) { return ws; }
  */
 const createWebSocket = typeof WebSocket !== "undefined"
     ? (url) => Promise.resolve(asMinimalWebSocket(new WebSocket(url)))
-    : ((wsP) => (url) => wsP.then((ws) => asMinimalWebSocket(new ws(url))))(Promise.resolve().then(() => require("ws")));
+    : ((wsP) => (url) => wsP.then((ws) => asMinimalWebSocket(new ws(url))))(import("ws"));
 /**
  * Throws TypeError when the value is `null` or `undefined`.
  * @param obj value to assert
@@ -36,7 +34,7 @@ function notNull(obj) {
 /**
  * The main class for accessing Twitch
  */
-class Twitch extends events_1.EventEmitter {
+export class Twitch extends EventEmitter {
     /**
      * Constructs Twitch class. This needs a username and oauth password.
      * If you don't have an oauth password, get it here: https://twitchapps.com/tmi/
@@ -83,7 +81,7 @@ class Twitch extends events_1.EventEmitter {
                 chatServer.send(`NICK ${this.user}`);
                 for (const channel of this.channels) {
                     // if channel has #, remove it ; also, lowercase the channel otherwise twitch doesn't work.
-                    chatServer.send(`JOIN ${utils_1.formatChannelName(channel)}`);
+                    chatServer.send(`JOIN ${formatChannelName(channel)}`);
                 }
                 chatServer.send(`USER ${this.user}`);
             };
@@ -133,9 +131,8 @@ class Twitch extends events_1.EventEmitter {
      */
     send(message, channel) {
         return __awaiter(this, void 0, void 0, function* () {
-            return (yield this.chatServer).send(`PRIVMSG ${utils_1.formatChannelName(channel)} :${message}`);
+            return (yield this.chatServer).send(`PRIVMSG ${formatChannelName(channel)} :${message}`);
         });
     }
 }
-exports.Twitch = Twitch;
 //# sourceMappingURL=twitch-wrapper-ts.js.map

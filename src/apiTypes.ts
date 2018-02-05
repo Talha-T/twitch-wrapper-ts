@@ -1,5 +1,5 @@
-export class TwitchErrorResponse {
-    error : string;
-    status : string;
-    message : string;
+export interface ITwitchErrorResponse {
+    error: string;
+    status: string;
+    message: string;
 }

@@ -1,8 +1,48 @@
-import * as request from "web-request";
 import { stringify } from "query-string";
-import TwitchError from "./twitchError";
-import { TwitchErrorResponse } from "./apiTypes";
+
+import { ITwitchErrorResponse } from "./apiTypes";
 import { ILooseObject } from "./looseObject";
+import TwitchError from "./twitchError";
+
+interface IHeaders {
+    [k: string]: string;
+}
+
+interface IMinimalResponse {
+    status: number;
+    json(): Promise<any>;
+}
+
+interface IMinimalFetch {
+    get: (url: string, headers: IHeaders) => Promise<IMinimalResponse>;
+    post: (url: string, headers: IHeaders) => Promise<IMinimalResponse>;
+    put: (url: string, headers: IHeaders) => Promise<IMinimalResponse>;
+    delete: (url: string, headers: IHeaders) => Promise<IMinimalResponse>;
+}
+
+const requestP: Promise<IMinimalFetch> = typeof fetch !== "undefined"
+    ? Promise.resolve({
+        delete: (url: string, headers: IHeaders) => fetch(url, { headers, method: "DELETE" }),
+        get: (url: string, headers: IHeaders) => fetch(url, { headers, method: "GET" }),
+        post: (url: string, headers: IHeaders) => fetch(url, { headers, method: "POST" }),
+        put: (url: string, headers: IHeaders) => fetch(url, { headers, method: "PUT" }),
+    }) : import("web-request" /* no module support for web-request */ + "").then((request) => {
+        // normalize response
+        Object.defineProperty(request.Response.prototype, "status", {
+            get(this: { statusCode: number; }) { return this.statusCode; },
+        });
+        (request.Response.prototype as any).json = function(this: { content: string; }) {
+            const text: string = this.content;
+            return new Promise((s) => JSON.parse(text));
+        };
+
+        return {
+            delete: (url: string, headers: IHeaders) => request.delete(url, { headers }),
+            get: (url: string, headers: IHeaders) => request.get(url, { headers }),
+            post: (url: string, headers: IHeaders) => request.post(url, { headers }),
+            put: (url: string, headers: IHeaders) => request.put(url, { headers }),
+        };
+    });
 
 /**
  * Interface class for requesters
@@ -23,21 +63,10 @@ export class ApiRequester implements IRequester {
     private oauth: string = "";
 
     /**
-     * Gets the headers
-     */
-    private getHeaders(): request.Headers {
-        return {
-            "Accept": "application/vnd.twitchtv.v5+json",
-            "Client-ID": this.clientId,
-            "Authorization": "OAuth " + this.oauth
-        };
-    }
-
-    /**
      * Constructs ApiRequester instance
      * @param clientId Twitch Client ID for API Calls
      */
-    constructor(clientId: string) {
+    public constructor(clientId: string) {
         this.clientId = clientId;
     }
 
@@ -46,21 +75,19 @@ export class ApiRequester implements IRequester {
      * @param path Path for the api call. Do NOT Include https://api.twitch.tv/kraken/
      * @param queryParameters A key-value object that is stringified to query parameters with api call
      */
-    async get<T>(path: string, queryParameters: ILooseObject): Promise<T> {
+    public async get<T>(path: string, queryParameters: ILooseObject): Promise<T> {
         // url and headers for request
         const queryString: string = stringify(queryParameters);
         const uri: string = this.baseUrl + path + "?" + queryString;
-        const headers: request.Headers = this.getHeaders();
+        const headers: IHeaders = this.getHeaders();
 
-        const result: request.Response<string> = await request.get(uri, {
-            headers: headers
-        });
-        if (result.statusCode > 308) { // 308 is the last 3xx status code.
-            const errorObject: TwitchErrorResponse = JSON.parse(result.content) as TwitchErrorResponse;
+        const request = await requestP;
+        const result = await request.get(uri, headers);
+        if (result.status > 308) { // 308 is the last 3xx status code.
+            const errorObject: ITwitchErrorResponse = await result.json();
             throw new TwitchError(errorObject);
         }
-        const resultObject: T = JSON.parse(result.content) as T;
-        return resultObject;
+        return result.json();
     }
 
     /**
@@ -68,21 +95,19 @@ export class ApiRequester implements IRequester {
      * @param path Path for the api call. Do NOT Include https://api.twitch.tv/kraken/
      * @param queryParameters A key-value object that is stringified to query parameters with api call
      */
-    async post<T>(path: string, queryParameters: ILooseObject): Promise<T> {
+    public async post<T>(path: string, queryParameters: ILooseObject): Promise<T> {
         // url and headers for request
         const queryString: string = stringify(queryParameters);
         const uri: string = this.baseUrl + path + "?" + queryString;
-        const headers: request.Headers = this.getHeaders();
+        const headers: IHeaders = this.getHeaders();
 
-        const result: request.Response<string> = await request.post(uri, {
-            headers: headers
-        });
-        if (result.statusCode > 308) { // 308 is the last 3xx status code.
-            const errorObject: TwitchErrorResponse = JSON.parse(result.content) as TwitchErrorResponse;
+        const request = await requestP;
+        const result = await request.post(uri, headers);
+        if (result.status > 308) { // 308 is the last 3xx status code.
+            const errorObject: ITwitchErrorResponse = await result.json();
             throw new TwitchError(errorObject);
         }
-        const resultObject: T = JSON.parse(result.content) as T;
-        return resultObject;
+        return result.json();
     }
 
     /**
@@ -90,21 +115,19 @@ export class ApiRequester implements IRequester {
      * @param path Path for the api call. Do NOT Include https://api.twitch.tv/kraken/
      * @param queryParameters A key-value object that is stringified to query parameters with api call
      */
-    async put<T>(path: string, queryParameters: ILooseObject): Promise<T> {
+    public async put<T>(path: string, queryParameters: ILooseObject): Promise<T> {
         // url and headers for request
         const queryString: string = stringify(queryParameters);
         const uri: string = this.baseUrl + path + "?" + queryString;
-        const headers: request.Headers = this.getHeaders();
+        const headers: IHeaders = this.getHeaders();
 
-        const result: request.Response<string> = await request.put(uri, {
-            headers: headers
-        });
-        if (result.statusCode > 308) { // 308 is the last 3xx status code.
-            const errorObject: TwitchErrorResponse = JSON.parse(result.content) as TwitchErrorResponse;
+        const request = await requestP;
+        const result = await request.put(uri, headers);
+        if (result.status > 308) { // 308 is the last 3xx status code.
+            const errorObject: ITwitchErrorResponse = await result.json();
             throw new TwitchError(errorObject);
         }
-        const resultObject: T = JSON.parse(result.content) as T;
-        return resultObject;
+        return result.json();
     }
 
     /**
@@ -112,29 +135,38 @@ export class ApiRequester implements IRequester {
      * @param path Path for the api call. Do NOT Include https://api.twitch.tv/kraken/
      * @param queryParameters A key-value object that is stringified to query parameters with api call
      */
-    async delete<T>(path: string, queryParameters: ILooseObject): Promise<T> {
+    public async delete<T>(path: string, queryParameters: ILooseObject): Promise<T> {
         // url and headers for request
         const queryString: string = stringify(queryParameters);
         const uri: string = this.baseUrl + path + "?" + queryString;
-        const headers: request.Headers = this.getHeaders();
+        const headers: IHeaders = this.getHeaders();
 
-        const result: request.Response<string> = await request.delete(uri, {
-            headers: headers
-        });
-        if (result.statusCode > 308) { // 308 is the last 3xx status code.
-            const errorObject: TwitchErrorResponse = JSON.parse(result.content) as TwitchErrorResponse;
+        const request = await requestP;
+        const result = await request.delete(uri, headers);
+        if (result.status > 308) { // 308 is the last 3xx status code.
+            const errorObject: ITwitchErrorResponse = await result.json();
             throw new TwitchError(errorObject);
         }
-        const resultObject: T = JSON.parse(result.content) as T;
-        return resultObject;
+        return result.json();
     }
 
     /**
      * Adds oauth token to headers, you can chain this method
      * @param oauth Oauth key to pass with headers. Do NOT include 'Oauth ' prefix
      */
-    authorize(oauth: string): this {
+    public authorize(oauth: string): this {
         this.oauth = oauth;
         return this;
+    }
+
+    /**
+     * Gets the headers
+     */
+    private getHeaders(): IHeaders {
+        return {
+            "Accept": "application/vnd.twitchtv.v5+json",
+            "Authorization": "OAuth " + this.oauth,
+            "Client-ID": this.clientId,
+        };
     }
 }
