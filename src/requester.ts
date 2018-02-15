@@ -33,7 +33,7 @@ const requestP: Promise<IMinimalFetch> = typeof fetch !== "undefined"
         });
         (request.Response.prototype as any).json = function(this: { content: string; }) {
             const text: string = this.content;
-            return new Promise((s) => JSON.parse(text));
+            return new Promise((resolve, reject) => resolve(JSON.parse(text)));
         };
 
         return {
@@ -87,7 +87,7 @@ export class ApiRequester implements IRequester {
             const errorObject: ITwitchErrorResponse = await result.json();
             throw new TwitchError(errorObject);
         }
-        return result.json();
+        return (await result.json());
     }
 
     /**
@@ -107,7 +107,7 @@ export class ApiRequester implements IRequester {
             const errorObject: ITwitchErrorResponse = await result.json();
             throw new TwitchError(errorObject);
         }
-        return result.json();
+        return (await result.json());
     }
 
     /**
@@ -127,7 +127,7 @@ export class ApiRequester implements IRequester {
             const errorObject: ITwitchErrorResponse = await result.json();
             throw new TwitchError(errorObject);
         }
-        return result.json();
+        return (await result.json());
     }
 
     /**
@@ -147,7 +147,7 @@ export class ApiRequester implements IRequester {
             const errorObject: ITwitchErrorResponse = await result.json();
             throw new TwitchError(errorObject);
         }
-        return result.json();
+        return (await result.json());
     }
 
     /**
@@ -160,7 +160,7 @@ export class ApiRequester implements IRequester {
     }
 
     /**
-     * Gets the headers
+     * Generates the headers according to variables
      */
     private getHeaders(): IHeaders {
         return {

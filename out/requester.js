@@ -23,7 +23,7 @@ const requestP = typeof fetch !== "undefined"
     });
     request.Response.prototype.json = function () {
         const text = this.content;
-        return new Promise((s) => JSON.parse(text));
+        return new Promise((resolve, reject) => resolve(JSON.parse(text)));
     };
     return {
         delete: (url, headers) => request.delete(url, { headers }),
@@ -63,7 +63,7 @@ class ApiRequester {
                 const errorObject = yield result.json();
                 throw new twitchError_1.default(errorObject);
             }
-            return result.json();
+            return (yield result.json());
         });
     }
     /**
@@ -135,7 +135,7 @@ class ApiRequester {
         return this;
     }
     /**
-     * Gets the headers
+     * Generates the headers according to variables
      */
     getHeaders() {
         return {

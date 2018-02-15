@@ -50,7 +50,7 @@ export declare class ApiRequester implements IRequester {
      */
     authorize(oauth: string): this;
     /**
-     * Gets the headers
+     * Generates the headers according to variables
      */
     private getHeaders();
 }
