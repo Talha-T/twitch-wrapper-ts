@@ -4,12 +4,8 @@
 ---
 
 ### Features:
-- Simple to use
-- Small
-- Easy to extend
-- Twitch chat livestream
-- Twitch API Calls
-- TODO: Twitch Response Types
+- Very simple to use, both chat wise and API wise.
+- Strongly typed API results.
 
 ### Installation:
 `npm install twitch-wrapper-ts`
@@ -56,28 +52,37 @@ Message {
 */
 ```
 
-Api Calls (types not yet implemented):
-```js
+Strongly typed API calls (Fully documented in the Intellisense) :
+```ts
 import { ApiRequester } from "twitch-wrapper-ts";
-const requester: ApiRequester = new ApiRequester(clientId);
-
-const result: any = await requester.get<any>("/users", {
-    login: ["implicit1"]
+const twitchApi = new TwitchApi(clientId, "aql8lmx0hzx2c7xevwx8ae4bqcntqj");
+const users = await twitchApi.users.get({
+    login: "implicit1",
 });
-console.log(result);
+
+const followData = await twitchApi.users.follows.get({
+    from_id: users.data[0].id,
+});
 /*
-{ _total: 1,
-  users:
-   [ { display_name: 'implicit1',
-       _id: '69056964',
-       name: 'implicit1',
-       type: 'user',
-       bio: null,
-       created_at: '2014-08-15T17:41:08.724835Z',
-       updated_at: '2018-01-05T20:03:12.090905Z',
-       logo: 'https://static-cdn.jtvnw.net/user-default-pictures/cd618d3e-f14d-4960-b7cf-094231b04735-profile_image-300x300.jpg' }
-] }
+{ total: 63,
+  data:
+   [ { fromId: '69056964',
+       toId: '30080751',
+       followedAt: '2018-02-10T16:52:34Z' },
+       ...
+   ]
+}
 */
+```
+
+Error handling:
+```ts
+try {
+    //something
+} catch (err) {
+    console.log(err.response);
+}
+// { error: 'Service Unavailable', status: 503, message: '' }
 ```
 
 ### Important Notes.
@@ -85,6 +90,15 @@ console.log(result);
 - If you do not have one, get it here: http://twitchapps.com/tmi/
 - Including # or not in the channel does NOT matter.
 - Currently you can get detailed information in IntelliSense, documententation will be added soon.
+- As an exception for the clips endpoint, you have to cast your data from `IClip` as here:
+```ts
+const clip = await twitchApi.clips.get({
+    id: "AwkwardHelplessSalamanderSwiftRage",
+});
+const clips = clip.data.map((clipV) => clipV as Clip);
+console.log(clips[0].embedUrl);
+```
+- If you cannot make something work, be sure to check the summary comments for it.
 
-### Contact:
-Implicit#8954 on Discord, or just open an issue.
+### Extra Contact:
+Implicit#8954 on Discord, talha6851@hotmail.com
