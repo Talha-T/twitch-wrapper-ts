@@ -55,7 +55,7 @@ Message {
 Strongly typed API calls (Fully documented in the Intellisense) :
 ```ts
 import { ApiRequester } from "twitch-wrapper-ts";
-const twitchApi = new TwitchApi(clientId, "aql8lmx0hzx2c7xevwx8ae4bqcntqj");
+const twitchApi = new TwitchApi(clientId, oauth);
 const users = await twitchApi.users.get({
     login: "implicit1",
 });
