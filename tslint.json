@@ -5,7 +5,10 @@
     ],
     "jsRules": {},
     "rules": {
-        "no-console": [false]
+        "no-console": [
+            false
+        ],
+        "max-classes-per-file": false
     },
     "rulesDirectory": []
 }

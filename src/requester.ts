@@ -1,7 +1,7 @@
 import { stringify } from "query-string";
+import { post } from "web-request";
 
 import { ITwitchErrorResponse } from "./apiTypes";
-import { ILooseObject } from "./looseObject";
 import TwitchError from "./twitchError";
 
 interface IHeaders {
@@ -15,9 +15,9 @@ interface IMinimalResponse {
 
 interface IMinimalFetch {
     get: (url: string, headers: IHeaders) => Promise<IMinimalResponse>;
-    post: (url: string, headers: IHeaders) => Promise<IMinimalResponse>;
-    put: (url: string, headers: IHeaders) => Promise<IMinimalResponse>;
-    delete: (url: string, headers: IHeaders) => Promise<IMinimalResponse>;
+    post: <T>(url: string, headers: IHeaders, content: T) => Promise<IMinimalResponse>;
+    put: <T>(url: string, headers: IHeaders, content: T) => Promise<IMinimalResponse>;
+    delete: <T>(url: string, headers: IHeaders, content: T) => Promise<IMinimalResponse>;
 }
 
 const requestP: Promise<IMinimalFetch> = typeof fetch !== "undefined"
@@ -31,7 +31,7 @@ const requestP: Promise<IMinimalFetch> = typeof fetch !== "undefined"
         Object.defineProperty(request.Response.prototype, "status", {
             get(this: { statusCode: number; }) { return this.statusCode; },
         });
-        (request.Response.prototype as any).json = function(this: { content: string; }) {
+        (request.Response.prototype as any).json = function (this: { content: string; }) {
             const text: string = this.content;
             return new Promise((resolve, reject) => resolve(JSON.parse(text)));
         };
@@ -47,35 +47,38 @@ const requestP: Promise<IMinimalFetch> = typeof fetch !== "undefined"
 /**
  * Interface class for requesters
  */
-export interface IRequester {
-    get: <T>(url: string, queryParameters: ILooseObject) => Promise<T>;
-    post: <T>(url: string, queryParameters: ILooseObject) => Promise<T>;
-    put: <T>(url: string, queryParameters: ILooseObject) => Promise<T>;
-    delete: <T>(url: string, queryParameters: ILooseObject) => Promise<T>;
+export interface IRequester<Q> {
+    get: <T>(url: string, queryParameters: Q) => Promise<T>;
+    post: <T>(url: string, queryParameters: Q) => Promise<T>;
+    put: <T>(url: string, queryParameters: Q) => Promise<T>;
+    delete: <T>(url: string, queryParameters: Q) => Promise<T>;
 }
 
 /**
  * The main Api Requester
  */
-export class ApiRequester implements IRequester {
-    private baseUrl: string = "https://api.twitch.tv/kraken/";
+export class ApiRequester<Q extends object> implements IRequester<Q> {
+    private baseUrl: string = "https://api.twitch.tv/helix";
     private clientId: string = "";
     private oauth: string = "";
 
     /**
      * Constructs ApiRequester instance
      * @param clientId Twitch Client ID for API Calls
+     * @param oauth Oauth token to pass with calls
+     * @param helix Decides to use whether kraken or helix to use with the requests
      */
-    public constructor(clientId: string) {
+    public constructor(clientId: string, oauth: string = "") {
         this.clientId = clientId;
+        this.oauth = oauth;
     }
 
     /**
      * Gets given **path** asynchronously
-     * @param path Path for the api call. Do NOT Include https://api.twitch.tv/kraken/
+     * @param path Path for the api call. Do NOT Include https://api.twitch.tv/kraken
      * @param queryParameters A key-value object that is stringified to query parameters with api call
      */
-    public async get<T>(path: string, queryParameters: ILooseObject): Promise<T> {
+    public async get<T>(path: string, queryParameters: Q): Promise<T> {
         // url and headers for request
         const queryString: string = stringify(queryParameters);
         const uri: string = this.baseUrl + path + "?" + queryString;
@@ -92,17 +95,16 @@ export class ApiRequester implements IRequester {
 
     /**
      * Posts given **path** asynchronously
-     * @param path Path for the api call. Do NOT Include https://api.twitch.tv/kraken/
+     * @param path Path for the api call. Do NOT Include https://api.twitch.tv/kraken
      * @param queryParameters A key-value object that is stringified to query parameters with api call
      */
-    public async post<T>(path: string, queryParameters: ILooseObject): Promise<T> {
+    public async post<T>(path: string, queryParameters: Q): Promise<T> {
         // url and headers for request
-        const queryString: string = stringify(queryParameters);
-        const uri: string = this.baseUrl + path + "?" + queryString;
+        const uri: string = this.baseUrl + path;
         const headers: IHeaders = this.getHeaders();
-
         const request = await requestP;
-        const result = await request.post(uri, headers);
+
+        const result = await request.post(uri, headers, queryParameters);
         if (result.status > 308) { // 308 is the last 3xx status code.
             const errorObject: ITwitchErrorResponse = await result.json();
             throw new TwitchError(errorObject);
@@ -115,14 +117,13 @@ export class ApiRequester implements IRequester {
      * @param path Path for the api call. Do NOT Include https://api.twitch.tv/kraken/
      * @param queryParameters A key-value object that is stringified to query parameters with api call
      */
-    public async put<T>(path: string, queryParameters: ILooseObject): Promise<T> {
+    public async put<T>(path: string, queryParameters: Q): Promise<T> {
         // url and headers for request
-        const queryString: string = stringify(queryParameters);
-        const uri: string = this.baseUrl + path + "?" + queryString;
+        const uri: string = this.baseUrl + path;
         const headers: IHeaders = this.getHeaders();
 
         const request = await requestP;
-        const result = await request.put(uri, headers);
+        const result = await request.put(uri, headers, queryParameters);
         if (result.status > 308) { // 308 is the last 3xx status code.
             const errorObject: ITwitchErrorResponse = await result.json();
             throw new TwitchError(errorObject);
@@ -135,14 +136,13 @@ export class ApiRequester implements IRequester {
      * @param path Path for the api call. Do NOT Include https://api.twitch.tv/kraken/
      * @param queryParameters A key-value object that is stringified to query parameters with api call
      */
-    public async delete<T>(path: string, queryParameters: ILooseObject): Promise<T> {
+    public async delete<T>(path: string, queryParameters: Q): Promise<T> {
         // url and headers for request
-        const queryString: string = stringify(queryParameters);
-        const uri: string = this.baseUrl + path + "?" + queryString;
+        const uri: string = this.baseUrl + path;
         const headers: IHeaders = this.getHeaders();
 
         const request = await requestP;
-        const result = await request.delete(uri, headers);
+        const result = await request.delete(uri, headers, queryParameters);
         if (result.status > 308) { // 308 is the last 3xx status code.
             const errorObject: ITwitchErrorResponse = await result.json();
             throw new TwitchError(errorObject);
@@ -160,12 +160,21 @@ export class ApiRequester implements IRequester {
     }
 
     /**
+     * Adds client ID to the headers, this method is chainable.
+     * @param clientId Client ID to send with headers.
+     */
+    public setClientId(clientId: string): this {
+        this.clientId = clientId;
+        return this;
+    }
+
+    /**
      * Generates the headers according to variables
      */
     private getHeaders(): IHeaders {
         return {
             "Accept": "application/vnd.twitchtv.v5+json",
-            "Authorization": "OAuth " + this.oauth,
+            // "Authorization": "Bearer " + this.oauth,
             "Client-ID": this.clientId,
         };
     }

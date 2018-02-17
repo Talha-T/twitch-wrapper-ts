@@ -7,6 +7,8 @@
   "types": "out/index.d.ts",
   "typings:": "out/index.d.ts",
   "dependencies": {
+    "@types/camelcase": "^4.1.0",
+    "camelcase": "^4.1.0",
     "query-string": "^5.0.1",
     "web-request": "^1.0.7",
     "ws": "^3.3.3"

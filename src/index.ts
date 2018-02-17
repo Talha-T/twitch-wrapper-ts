@@ -3,3 +3,4 @@ export { Message } from "./looseObject";
 export { Broadcaster } from "./looseObject";
 export { IRequester, ApiRequester } from "./requester";
 export { ChannelUserState, GlobalUserState, ILooseObject } from "./looseObject";
+export { TwitchApi } from "./api/endpoint";
