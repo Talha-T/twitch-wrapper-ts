@@ -59,4 +59,4 @@ typings/
 
 src/
 tsconfig.json
-out/testjs
+out/test.js
