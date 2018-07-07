@@ -7,6 +7,8 @@
 - Very simple to use, both chat wise and API wise.
 - Strongly typed API results.
 
+[Bot Example](https://github.com/Talha-T/twitch-bot)
+
 ### Installation:
 `npm install twitch-wrapper-ts`
 
