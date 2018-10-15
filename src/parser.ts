@@ -54,12 +54,25 @@ export class Parser {
      */
     public parseMessage(message: string): Message {
         // there are two :'s, first for seperating message data; second for content
+        let colonsOfArray = message.split('').filter((element, index, array) => {
+            return element.indexOf(':') !== -1;
+        });
+        let amountOfColons: number = colonsOfArray.length;
+
         const colonIndex: number = message.indexOf(":");
         const data: string = message.substr(0, colonIndex - 1); // get data 'til :
         const messageObj: Message = this.parseObject(data, Message);
 
         const channelIndex: number = message.indexOf("PRIVMSG") + "PRIVMSG".length + 1; // 1 for the space
-        const lastColonIndex: number = message.lastIndexOf(":");
+
+        let lastColonIndex: number = 0;
+        if(amountOfColons > 2){
+            let debug = message.substring(0, message.lastIndexOf(":") - 1);
+            lastColonIndex = debug.lastIndexOf(":");
+        }else{
+            lastColonIndex = message.lastIndexOf(":");
+        }
+
         const channel: string = message.substring(channelIndex, lastColonIndex - 1);
         const content: string = message.substring(lastColonIndex + 1);
         messageObj.channel = channel;
