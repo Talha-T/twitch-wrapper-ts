@@ -1,6 +1,6 @@
 {
   "name": "twitch-wrapper-ts",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Twitch API Wrapper for TypeScript in node.js environment.",
   "main": "out/index",
   "module": "esm/index.js",
